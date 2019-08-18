@@ -15,9 +15,7 @@ RUN /usr/sbin/caddy -version
 
 EXPOSE 80 443
 
-COPY Caddyfile /etc/Caddyfile
-
-VOLUME ["/var/www/html"]
+VOLUME ["/var/www/html","/etc/Caddyfile"]
 
 WORKDIR /var/www/html
 ENTRYPOINT ["/usr/sbin/caddy"]

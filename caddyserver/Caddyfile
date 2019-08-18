@@ -1,17 +1,50 @@
+# FROM: https://skippy.net/caddy-docker-php-wordpress/
+# www to no-www https
+# www.example.com {
+#   redir https://example.com{uri}
+# }
+
 0.0.0.0:80,
 0.0.0.0:443 {
-	root /var/www/html
-	gzip
-	fastcgi / wordpress:9000 php
+  root /var/www/html
+  gzip
+  # for test site
+  tls off
+  #tls <HTTPS EMAIL HERE@EXAMPLE.COM>
 
-	# prevents malicious PHP uploads from running
-	rewrite {
-		r /uploads\/(.*)\.php
-		to /
-	}
+  # if you want to block all WP comments, try uncommenting this:
+  #internal /wp-comments-post.php
 
-	rewrite {
-		if {path} not_match ^\/wp-admin
-		to {path} {path}/ /index.php?{query}
-	}
+  # WordPress rewrites
+    #  rewrite {
+    #    if {path} not_match ^\/wp-admin
+    #    to {path} {path}/ /index.php?_url={uri}
+    #  }
+  # the following two rewrites are only for sub-domain multi-site.
+  # if you use top-level domain mapping, you probably don't need these.
+  # rewrite {
+  #   r ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*)
+  #   to ${2}
+  # }
+  # rewrite {
+  #   if {path} not_match ^\/wp-admin
+  #   r ^([_0-9a-zA-Z-]+/)?(.*\.php)$
+  #   to ${2}
+  # }
+
+  # here is where we send PHP requests to the php-fpm container
+  # use container name 'wordpress' according to docker-compose.yml
+  fastcgi / wordpress:9000 php
+
+# prevents malicious PHP uploads from running
+rewrite {
+    r /uploads\/(.*)\.php
+    to /
+  }
+
+  # don't log WP Ajax calls. It clutters up the logs.
+  log /wp-admin/admin-ajax.php /dev/null
+
+  log stdout
+  errors stderr
 }
