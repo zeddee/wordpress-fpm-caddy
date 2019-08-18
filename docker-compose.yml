@@ -5,6 +5,7 @@ services:
     container_name: wordpress
     volumes:
       - ./wordpress:/var/www/html
+      - ./php.ini:/usr/local/etc/php/php.ini
     env_file: .env-example
     depends_on:
       - mysql
@@ -29,6 +30,7 @@ services:
       - wordpress
     volumes:
       - ./caddyserver/Caddyfile:/etc/Caddyfile
+      - ./wordpress:/var/www/html
     ports:
       - "80:80"
       - "443:443"
