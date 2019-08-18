@@ -1,0 +1,17 @@
+0.0.0.0:80,
+0.0.0.0:443 {
+	root /var/www/html
+	gzip
+	fastcgi / wordpress:9000 php
+
+	# prevents malicious PHP uploads from running
+	rewrite {
+		r /uploads\/(.*)\.php
+		to /
+	}
+
+	rewrite {
+		if {path} not_match ^\/wp-admin
+		to {path} {path}/ /index.php?{query}
+	}
+}
